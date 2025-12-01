@@ -9,6 +9,13 @@ JellyfinTV simulates a linear TV experience using your existing Jellyfin library
 - **Auto-Refill**: Schedules are automatically topped up as you watch.
 - **Direct Streaming**: Plays content directly from your Jellyfin server to your browser.
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/ea3c55cf-ef15-409f-a072-db4abd80abaf" width="32%" alt="JellyfinTV Dashboard" />
+  <img src="https://github.com/user-attachments/assets/c09992d6-35a3-4cb7-b245-62847520ba5d" width="32%" alt="Channel Creation" />
+  <img src="https://github.com/user-attachments/assets/90cf2174-b18f-4774-aeec-edfba66305f0" width="32%" alt="Schedule View" />
+</p>
+
+
 ## Quick Start (Docker)
 
 The easiest way to run JellyfinTV is with Docker.
