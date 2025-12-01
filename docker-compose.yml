@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  jellyfintv:
+    build: .
+    container_name: jellyfintv
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./jellyfintv.db:/app/jellyfintv.db
+    restart: unless-stopped

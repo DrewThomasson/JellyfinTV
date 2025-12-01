@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watching Channel</title>
+    <style>
+        body {
+            background: #000;
+            color: #fff;
+            margin: 0;
+            overflow: hidden;
+            font-family: sans-serif;
+        }
+
+        #player-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        #overlay {
+            position: absolute;
+            bottom: 50px;
+            left: 50px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 8px;
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+        }
+
+        body:hover #overlay {
+            opacity: 1;
+        }
+
+        h1 {
+            margin: 0 0 10px 0;
+            font-size: 24px;
+        }
+
+        p {
+            margin: 0;
+            color: #ccc;
+        }
+
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="loading">Loading Channel...</div>
+    <div id="player-container">
+        <video id="video-player" controls autoplay></video>
+    </div>
+    <div id="overlay">
+        <h1 id="show-title">Title</h1>
+        <p id="show-meta">00:00 / 00:00</p>
+    </div>
+
+    <script>
+        const channelId = window.location.pathname.split('/').pop();
+        const video = document.getElementById('video-player');
+        let currentItemId = null;
+
+        async function checkSchedule() {
+            try {
+                const res = await fetch(`/api/channels/${channelId}/now`);
+                const data = await res.json();
+
+                if (data.status === 'playing') {
+                    document.getElementById('loading').style.display = 'none';
+                    const item = data.item;
+
+                    // If it's a new item, start playing
+                    if (item.id !== currentItemId) {
+                        currentItemId = item.id;
+
+                        // Construct stream URL
+                        // Jellyfin stream URL: /Videos/{Id}/stream?static=true&mediaSourceId={Id}&deviceId={DeviceId}&api_key={Token}
+                        // We use the token and URL from the API response
+                        const streamUrl = `${data.jellyfin_url}/Videos/${item.item_id}/stream?static=true&mediaSourceId=${item.item_id}&deviceId=jellyfintv-client&api_key=${data.jellyfin_token}`;
+
+                        video.src = streamUrl;
+                        video.currentTime = data.offset_seconds;
+                        video.play();
+
+                        document.getElementById('show-title').innerText = item.item_name;
+                    } else {
+                        // Sync check: if we drifted too far, seek
+                        if (Math.abs(video.currentTime - data.offset_seconds) > 10) {
+                            console.log("Syncing...");
+                            video.currentTime = data.offset_seconds;
+                        }
+                    }
+                } else {
+                    document.getElementById('loading').innerText = "Channel Offline (Refilling...)";
+                    // Trigger refill?
+                    fetch(`/api/channels/${channelId}/refill`, { method: 'POST' });
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // Check schedule every 10 seconds to sync/change show
+        setInterval(checkSchedule, 10000);
+
+        // Initial check
+        checkSchedule();
+
+        // When video ends, check immediately
+        video.onended = () => {
+            console.log("Video ended, checking next...");
+            currentItemId = null; // Force reload
+            checkSchedule();
+        };
+    </script>
+</body>
+
+</html>

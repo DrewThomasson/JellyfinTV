@@ -1,0 +1,160 @@
+from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks
+from fastapi.staticfiles import StaticFiles
+from sqlmodel import Session, select
+from typing import List
+import json
+from datetime import datetime
+
+from database import create_db_and_tables, get_session
+from models import Channel, ScheduleItem, ContentCriteria
+from config import settings
+from jellyfin_client import jellyfin
+from scheduler import fill_channel_schedule
+
+app = FastAPI()
+
+# Mount static files
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+@app.on_event("startup")
+def on_startup():
+    create_db_and_tables()
+
+# --- API Routes ---
+
+@app.post("/api/login")
+async def login(credentials: dict):
+    settings.JELLYFIN_URL = credentials.get("url")
+    settings.JELLYFIN_USERNAME = credentials.get("username")
+    settings.JELLYFIN_PASSWORD = credentials.get("password")
+    
+    # Re-init client with new URL if needed (or just rely on settings)
+    jellyfin.base_url = settings.JELLYFIN_URL
+    
+    success = await jellyfin.login()
+    if not success:
+        raise HTTPException(status_code=401, detail="Login failed")
+    return {"status": "success"}
+
+@app.get("/api/channels", response_model=List[Channel])
+def get_channels(session: Session = Depends(get_session)):
+    channels = session.exec(select(Channel)).all()
+    return channels
+
+@app.post("/api/channels", response_model=Channel)
+def create_channel(channel: Channel, background_tasks: BackgroundTasks, session: Session = Depends(get_session)):
+    session.add(channel)
+    session.commit()
+    session.refresh(channel)
+    background_tasks.add_task(fill_channel_schedule, channel.id)
+    return channel
+
+@app.delete("/api/channels/{channel_id}")
+def delete_channel(channel_id: int, session: Session = Depends(get_session)):
+    channel = session.get(Channel, channel_id)
+    if not channel:
+        raise HTTPException(status_code=404, detail="Channel not found")
+    
+    # Delete associated schedule items first (cascade usually handles this but let's be safe or rely on SQLModel)
+    # SQLModel relationships with cascade delete would be ideal, but manual delete is fine for now
+    items = session.exec(select(ScheduleItem).where(ScheduleItem.channel_id == channel_id)).all()
+    for item in items:
+        session.delete(item)
+        
+    session.delete(channel)
+    session.commit()
+    return {"status": "deleted"}
+
+@app.get("/api/channels/{channel_id}/now", response_model=dict)
+async def get_channel_now(channel_id: int, background_tasks: BackgroundTasks, session: Session = Depends(get_session)):
+    # Find what's playing now
+    now = datetime.now()
+    statement = select(ScheduleItem).where(
+        ScheduleItem.channel_id == channel_id,
+        ScheduleItem.start_time <= now,
+        ScheduleItem.end_time > now
+    )
+    item = session.exec(statement).first()
+    
+    if not item:
+        # Channel is offline/empty. Refill immediately!
+        print(f"Channel {channel_id} is offline. Refilling now...")
+        await fill_channel_schedule(channel_id)
+        
+        # Re-query
+        item = session.exec(statement).first()
+        
+        if not item:
+            # Still nothing? Maybe no content matches criteria.
+            return {"status": "offline"}
+            
+    # Check if we need to top up the schedule (if less than 5 items remaining)
+    future_count = session.exec(select(ScheduleItem).where(
+        ScheduleItem.channel_id == channel_id,
+        ScheduleItem.start_time > now
+    )).all()
+    
+    if len(future_count) < 5:
+        print(f"Channel {channel_id} running low. Scheduling refill.")
+        background_tasks.add_task(fill_channel_schedule, channel_id)
+        
+    # Calculate offset
+    offset_seconds = (now - item.start_time).total_seconds()
+    
+    return {
+        "status": "playing",
+        "item": item,
+        "offset_seconds": offset_seconds,
+        "jellyfin_url": settings.JELLYFIN_URL,
+        "jellyfin_token": settings.JELLYFIN_TOKEN
+    }
+
+@app.get("/api/channels/{channel_id}/schedule")
+def get_channel_schedule(channel_id: int, session: Session = Depends(get_session)):
+    now = datetime.now()
+    statement = select(ScheduleItem).where(
+        ScheduleItem.channel_id == channel_id,
+        ScheduleItem.end_time > now
+    ).order_by(ScheduleItem.start_time).limit(20)
+    items = session.exec(statement).all()
+    return items
+
+@app.post("/api/channels/{channel_id}/refill")
+async def refill_channel(channel_id: int, background_tasks: BackgroundTasks):
+    background_tasks.add_task(fill_channel_schedule, channel_id)
+    return {"status": "scheduled"}
+
+@app.get("/api/library/genres")
+async def get_genres():
+    return await jellyfin.get_genres()
+
+@app.get("/api/library/stats")
+async def get_stats():
+    return await jellyfin.get_library_stats()
+
+@app.get("/api/library/tags")
+async def get_tags():
+    return await jellyfin.get_tags()
+
+@app.get("/api/library/studios")
+async def get_studios():
+    return await jellyfin.get_studios()
+
+@app.get("/api/library/ratings")
+async def get_ratings():
+    return await jellyfin.get_ratings()
+
+@app.post("/api/library/search")
+async def search_library(criteria: dict):
+    # Wrapper to search items based on UI filters
+    return await jellyfin.search_items(criteria)
+
+# Serve index
+from fastapi.responses import FileResponse
+@app.get("/")
+async def read_index():
+    return FileResponse('static/index.html')
+
+@app.get("/watch/{channel_id}")
+async def watch_channel(channel_id: int):
+    return FileResponse('static/channel.html')

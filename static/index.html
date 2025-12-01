@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JellyfinTV</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #121212;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max_width: 900px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: #1e1e1e;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #fff;
+            margin-top: 0;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #00a4dc;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            padding: 12px;
+            margin: 8px 0;
+            width: 100%;
+            box-sizing: border-box;
+            background: #333;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 6px;
+        }
+
+        button {
+            background: #00a4dc;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 16px;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #008bb9;
+        }
+
+        button.danger {
+            background: #d32f2f;
+        }
+
+        button.danger:hover {
+            background: #b71c1c;
+        }
+
+        button.secondary {
+            background: #555;
+        }
+
+        button.secondary:hover {
+            background: #444;
+        }
+
+        .channel-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .channel-item {
+            background: #2d2d2d;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #00a4dc;
+        }
+
+        .channel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .channel-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .channel-item a {
+            color: #00a4dc;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .schedule-view {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #444;
+            display: none;
+        }
+
+        .schedule-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        .schedule-item.now {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        /* Grid for Genres/Tags/etc */
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
+            margin: 10px 0;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            border: 1px solid #333;
+            border-radius: 6px;
+            background: #1a1a1a;
+        }
+
+        .filter-item {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .filter-item:hover {
+            background: #333;
+        }
+
+        .filter-item input {
+            width: auto;
+            margin-right: 8px;
+            cursor: pointer;
+        }
+
+        /* Dual Slider */
+        .slider-wrapper {
+            position: relative;
+            width: 100%;
+            height: 50px;
+            margin-top: 20px;
+        }
+
+        .slider-track {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #444;
+            border-radius: 2px;
+        }
+
+        .slider-range {
+            position: absolute;
+            top: 20px;
+            height: 4px;
+            background: #00a4dc;
+            border-radius: 2px;
+        }
+
+        input[type="range"] {
+            position: absolute;
+            top: 10px;
+            left: 0;
+            width: 100%;
+            -webkit-appearance: none;
+            background: transparent;
+            pointer-events: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #fff;
+            cursor: pointer;
+            pointer-events: auto;
+            margin-top: -8px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #fff;
+            cursor: pointer;
+            pointer-events: auto;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+            border: none;
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: -10px;
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        .year-display {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #00a4dc;
+            margin-bottom: 10px;
+        }
+
+        /* Show List */
+        .show-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #333;
+            border-radius: 6px;
+            margin-top: 10px;
+            background: #1a1a1a;
+        }
+
+        .show-item {
+            padding: 10px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            align-items: center;
+        }
+
+        .show-item:hover {
+            background: #2a2a2a;
+        }
+
+        .show-item input {
+            width: auto;
+            margin-right: 10px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .loading {
+            color: #aaa;
+            font-style: italic;
+            padding: 10px;
+        }
+
+        /* Collapsible Advanced */
+        .advanced-toggle {
+            cursor: pointer;
+            color: #00a4dc;
+            margin: 10px 0;
+            display: inline-block;
+        }
+
+        .advanced-section {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background: #252525;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>JellyfinTV</h1>
+
+        <div class="card" id="login-section">
+            <h2>Connect to Jellyfin</h2>
+            <input type="text" id="jf-url" placeholder="Jellyfin URL (e.g. http://localhost:8096)">
+            <input type="text" id="jf-user" placeholder="Username">
+            <input type="password" id="jf-pass" placeholder="Password">
+            <button onclick="login()" style="width:100%">Connect</button>
+        </div>
+
+        <div class="card hidden" id="create-channel-section">
+            <h2>Create Channel</h2>
+            <input type="text" id="ch-name" placeholder="Channel Name (e.g. 90s Comedy)">
+
+            <h3>1. Select Genres</h3>
+            <div class="filter-grid" id="genre-grid">
+                <div class="loading">Loading genres...</div>
+            </div>
+
+            <h3>2. Select Year Range</h3>
+            <div class="year-display" id="year-display">1900 - 2024</div>
+            <div class="slider-wrapper">
+                <div class="slider-track"></div>
+                <div class="slider-range" id="slider-range"></div>
+                <input type="range" id="slider-min" min="1900" max="2024" value="1900" step="1">
+                <input type="range" id="slider-max" min="1900" max="2024" value="2024" step="1">
+                <div class="slider-labels">
+                    <span id="min-label">1900</span>
+                    <span id="max-label">2024</span>
+                </div>
+            </div>
+
+            <div class="advanced-toggle" onclick="toggleAdvanced()">▶ Show Advanced Filters (Studios, Ratings, Tags)
+            </div>
+            <div class="advanced-section" id="advanced-section">
+                <h3>Studios</h3>
+                <div class="filter-grid" id="studio-grid">
+                    <div class="loading">Loading studios...</div>
+                </div>
+
+                <h3>Content Ratings</h3>
+                <div class="filter-grid" id="rating-grid">
+                    <div class="loading">Loading ratings...</div>
+                </div>
+
+                <h3>Tags</h3>
+                <div class="filter-grid" id="tag-grid">
+                    <div class="loading">Loading tags...</div>
+                </div>
+            </div>
+
+            <h3>3. Filtered Shows (Optional)</h3>
+            <input type="text" id="show-search" placeholder="Search shows..." onkeyup="filterShowList()"
+                style="margin-bottom: 10px;">
+            <p style="font-size:12px; color:#aaa">Leave all unchecked to include all matching above criteria.</p>
+            <div class="show-list" id="show-list">
+                <div class="loading">Waiting for selection...</div>
+            </div>
+
+            <button onclick="createChannel()" style="margin-top:20px; width:100%">Create Channel</button>
+        </div>
+
+        <div class="card hidden" id="channels-section">
+            <h2>Your Channels</h2>
+            <ul class="channel-list" id="channel-list">
+                <!-- Channels here -->
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let allGenres = [];
+        let searchTimeout = null;
+
+        async function login() {
+            const url = document.getElementById('jf-url').value;
+            const username = document.getElementById('jf-user').value;
+            const password = document.getElementById('jf-pass').value;
+
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url, username, password })
+            });
+
+            if (res.ok) {
+                document.getElementById('login-section').classList.add('hidden');
+                document.getElementById('create-channel-section').classList.remove('hidden');
+                document.getElementById('channels-section').classList.remove('hidden');
+
+                // Initialize Data
+                await loadLibraryData();
+                loadChannels();
+            } else {
+                alert('Failed to connect');
+            }
+        }
+
+        function toggleAdvanced() {
+            const el = document.getElementById('advanced-section');
+            const btn = document.querySelector('.advanced-toggle');
+            if (el.style.display === 'block') {
+                el.style.display = 'none';
+                btn.innerText = '▶ Show Advanced Filters (Studios, Ratings, Tags)';
+            } else {
+                el.style.display = 'block';
+                btn.innerText = '▼ Hide Advanced Filters';
+            }
+        }
+
+        async function loadLibraryData() {
+            // 1. Get Stats (Years)
+            const statsRes = await fetch('/api/library/stats');
+            const stats = await statsRes.json();
+            setupSlider(stats.min_year, stats.max_year);
+
+            // 2. Get Genres
+            loadGrid('/api/library/genres', 'genre-grid');
+
+            // 3. Get Advanced
+            loadGrid('/api/library/studios', 'studio-grid');
+            loadGrid('/api/library/ratings', 'rating-grid');
+            loadGrid('/api/library/tags', 'tag-grid');
+
+            // 4. Initial Show Load
+            scheduleUpdate();
+        }
+
+        async function loadGrid(url, elementId) {
+            const res = await fetch(url);
+            const items = await res.json();
+            const grid = document.getElementById(elementId);
+            grid.innerHTML = '';
+            if (items.length === 0) {
+                grid.innerHTML = '<div class="loading">None found.</div>';
+                return;
+            }
+            items.forEach(item => {
+                const div = document.createElement('label');
+                div.className = 'filter-item';
+                div.innerHTML = `<input type="checkbox" value="${item}" onchange="scheduleUpdate()"> ${item}`;
+                grid.appendChild(div);
+            });
+        }
+
+        function setupSlider(min, max) {
+            const sliderMin = document.getElementById('slider-min');
+            const sliderMax = document.getElementById('slider-max');
+            const minLabel = document.getElementById('min-label');
+            const maxLabel = document.getElementById('max-label');
+
+            sliderMin.min = min; sliderMin.max = max; sliderMin.value = min;
+            sliderMax.min = min; sliderMax.max = max; sliderMax.value = max;
+            minLabel.innerText = min;
+            maxLabel.innerText = max;
+
+            function updateSlider() {
+                let val1 = parseInt(sliderMin.value);
+                let val2 = parseInt(sliderMax.value);
+
+                if (val1 > val2) {
+                    const tmp = val1; val1 = val2; val2 = tmp;
+                }
+
+                document.getElementById('year-display').innerText = `${val1} - ${val2}`;
+
+                // Update track
+                const percent1 = ((val1 - min) / (max - min)) * 100;
+                const percent2 = ((val2 - min) / (max - min)) * 100;
+                const range = document.getElementById('slider-range');
+                range.style.left = percent1 + '%';
+                range.style.width = (percent2 - percent1) + '%';
+            }
+
+            sliderMin.oninput = () => { updateSlider(); scheduleUpdate(); };
+            sliderMax.oninput = () => { updateSlider(); scheduleUpdate(); };
+            updateSlider();
+        }
+
+        function scheduleUpdate() {
+            if (searchTimeout) clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(updateShows, 500);
+        }
+
+        async function updateShows() {
+            const list = document.getElementById('show-list');
+            list.innerHTML = '<div class="loading">Loading shows...</div>';
+
+            const selectedGenres = Array.from(document.querySelectorAll('#genre-grid input:checked')).map(cb => cb.value);
+            const selectedStudios = Array.from(document.querySelectorAll('#studio-grid input:checked')).map(cb => cb.value);
+            const selectedRatings = Array.from(document.querySelectorAll('#rating-grid input:checked')).map(cb => cb.value);
+            const selectedTags = Array.from(document.querySelectorAll('#tag-grid input:checked')).map(cb => cb.value);
+
+            let yearMin = parseInt(document.getElementById('slider-min').value);
+            let yearMax = parseInt(document.getElementById('slider-max').value);
+            if (yearMin > yearMax) { const t = yearMin; yearMin = yearMax; yearMax = t; }
+
+            let years = [];
+            for (let y = yearMin; y <= yearMax; y++) {
+                years.push(y.toString());
+            }
+
+            const criteria = {
+                genres: selectedGenres,
+                years: years,
+                studios: selectedStudios,
+                ratings: selectedRatings,
+                tags: selectedTags
+            };
+
+            try {
+                const res = await fetch('/api/library/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(criteria)
+                });
+
+                const items = await res.json();
+
+                list.innerHTML = '';
+
+                if (items.length === 0) {
+                    list.innerHTML = '<div class="loading">No shows found matching criteria.</div>';
+                    return;
+                }
+
+                // Sort alphabetically
+                items.sort((a, b) => a.Name.localeCompare(b.Name));
+
+                items.slice(0, 100).forEach(item => {
+                    const div = document.createElement('label');
+                    div.className = 'show-item';
+                    div.innerHTML = `<input type="checkbox" value="${item.Id}"> <span class="show-name">${item.Name}</span> <span style="color:#888; margin-left:5px">(${item.ProductionYear || '?'})</span>`;
+                    list.appendChild(div);
+                });
+
+                // Re-apply search filter if exists
+                filterShowList();
+            } catch (e) {
+                list.innerHTML = '<div class="loading">Error loading shows.</div>';
+            }
+        }
+
+        function filterShowList() {
+            const input = document.getElementById('show-search');
+            const filter = input.value.toLowerCase();
+            const list = document.getElementById('show-list');
+            const items = list.getElementsByClassName('show-item');
+
+            for (let i = 0; i < items.length; i++) {
+                const span = items[i].getElementsByClassName('show-name')[0];
+                if (span) {
+                    const txtValue = span.textContent || span.innerText;
+                    if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                        items[i].style.display = "";
+                    } else {
+                        items[i].style.display = "none";
+                    }
+                }
+            }
+        }
+
+        async function createChannel() {
+            const name = document.getElementById('ch-name').value;
+            if (!name) { alert('Enter a name'); return; }
+
+            const selectedGenres = Array.from(document.querySelectorAll('#genre-grid input:checked')).map(cb => cb.value);
+            const selectedStudios = Array.from(document.querySelectorAll('#studio-grid input:checked')).map(cb => cb.value);
+            const selectedRatings = Array.from(document.querySelectorAll('#rating-grid input:checked')).map(cb => cb.value);
+            const selectedTags = Array.from(document.querySelectorAll('#tag-grid input:checked')).map(cb => cb.value);
+
+            let yearMin = parseInt(document.getElementById('slider-min').value);
+            let yearMax = parseInt(document.getElementById('slider-max').value);
+            if (yearMin > yearMax) { const t = yearMin; yearMin = yearMax; yearMax = t; }
+
+            let years = [];
+            for (let y = yearMin; y <= yearMax; y++) {
+                years.push(y.toString());
+            }
+
+            const selectedItems = Array.from(document.querySelectorAll('#show-list input:checked')).map(cb => cb.value);
+
+            const criteria = {
+                genres: selectedGenres,
+                years: years,
+                studios: selectedStudios,
+                ratings: selectedRatings,
+                tags: selectedTags,
+                include_items: selectedItems.length > 0 ? selectedItems : undefined
+            };
+
+            const res = await fetch('/api/channels', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, criteria: JSON.stringify(criteria) })
+            });
+
+            if (res.ok) {
+                loadChannels();
+                document.getElementById('ch-name').value = '';
+                alert('Channel Created!');
+            }
+        }
+
+        async function loadChannels() {
+            const res = await fetch('/api/channels');
+            const channels = await res.json();
+            const list = document.getElementById('channel-list');
+            list.innerHTML = '';
+            channels.forEach(ch => {
+                const li = document.createElement('li');
+                li.className = 'channel-item';
+                li.innerHTML = `
+                    <div class="channel-header">
+                        <span>${ch.name}</span>
+                        <div class="channel-actions">
+                            <button class="secondary" onclick="toggleSchedule(${ch.id})">Schedule</button>
+                            <a href="/watch/${ch.id}" target="_blank"><button>Watch</button></a>
+                            <button class="danger" onclick="deleteChannel(${ch.id})">Delete</button>
+                        </div>
+                    </div>
+                    <div class="schedule-view" id="schedule-${ch.id}">
+                        <div class="loading">Loading schedule...</div>
+                    </div>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        async function deleteChannel(id) {
+            if (!confirm('Are you sure you want to delete this channel?')) return;
+            const res = await fetch(`/api/channels/${id}`, { method: 'DELETE' });
+            if (res.ok) loadChannels();
+        }
+
+        async function toggleSchedule(id) {
+            const el = document.getElementById(`schedule-${id}`);
+            if (el.style.display === 'block') {
+                el.style.display = 'none';
+                return;
+            }
+            el.style.display = 'block';
+
+            const res = await fetch(`/api/channels/${id}/schedule`);
+            const items = await res.json();
+
+            el.innerHTML = '';
+            if (items.length === 0) {
+                el.innerHTML = '<div class="loading">No schedule. Try refilling.</div>';
+                return;
+            }
+
+            items.forEach(item => {
+                const start = new Date(item.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const end = new Date(item.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const div = document.createElement('div');
+                div.className = 'schedule-item';
+                div.innerHTML = `<span>${start} - ${end}</span> <span>${item.item_name}</span>`;
+                el.appendChild(div);
+            });
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+httpx
+pydantic
+sqlmodel
+jinja2
+python-multipart
