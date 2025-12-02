@@ -15,6 +15,7 @@ app = FastAPI()
 
 # Mount static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/ads", StaticFiles(directory="ads"), name="ads")
 
 @app.on_event("startup")
 def on_startup():
@@ -46,6 +47,27 @@ def create_channel(channel: Channel, background_tasks: BackgroundTasks, session:
     session.add(channel)
     session.commit()
     session.refresh(channel)
+    background_tasks.add_task(fill_channel_schedule, channel.id)
+    return channel
+
+@app.put("/api/channels/{channel_id}", response_model=Channel)
+def update_channel(channel_id: int, updated_channel: Channel, background_tasks: BackgroundTasks, session: Session = Depends(get_session)):
+    channel = session.get(Channel, channel_id)
+    if not channel:
+        raise HTTPException(status_code=404, detail="Channel not found")
+        
+    channel.name = updated_channel.name
+    channel.criteria = updated_channel.criteria
+    channel.ads_enabled = updated_channel.ads_enabled
+    channel.ad_interval_mins = updated_channel.ad_interval_mins
+    channel.ads_per_break = updated_channel.ads_per_break
+    
+    session.add(channel)
+    session.commit()
+    session.refresh(channel)
+    
+    # Trigger refill to apply new settings (might take time to propagate if schedule is full)
+    # Ideally we'd clear future schedule but let's keep it simple
     background_tasks.add_task(fill_channel_schedule, channel.id)
     return channel
 
@@ -101,10 +123,14 @@ async def get_channel_now(channel_id: int, background_tasks: BackgroundTasks, se
     # Calculate offset
     offset_seconds = (now - item.start_time).total_seconds()
     
+    # Adjust offset for mid-rolls
+    final_offset = offset_seconds + item.media_start_offset
+    
     return {
         "status": "playing",
         "item": item,
-        "offset_seconds": offset_seconds,
+        "offset_seconds": final_offset,
+        "is_ad": item.is_ad,
         "jellyfin_url": settings.JELLYFIN_URL,
         "jellyfin_token": settings.JELLYFIN_TOKEN
     }

@@ -93,9 +93,15 @@
                         currentItemId = item.id;
 
                         // Construct stream URL
-                        // Jellyfin stream URL: /Videos/{Id}/stream?static=true&mediaSourceId={Id}&deviceId={DeviceId}&api_key={Token}
-                        // We use the token and URL from the API response
-                        const streamUrl = `${data.jellyfin_url}/Videos/${item.item_id}/stream?static=true&mediaSourceId=${item.item_id}&deviceId=jellyfintv-client&api_key=${data.jellyfin_token}`;
+                        let streamUrl;
+                        if (data.is_ad) {
+                            // Local Ad File
+                            // item.item_id is relative path like "1990/ad.mp4"
+                            streamUrl = `/ads/${item.item_id}`;
+                        } else {
+                            // Jellyfin Stream
+                            streamUrl = `${data.jellyfin_url}/Videos/${item.item_id}/stream?static=true&mediaSourceId=${item.item_id}&deviceId=jellyfintv-client&api_key=${data.jellyfin_token}`;
+                        }
 
                         video.src = streamUrl;
                         video.currentTime = data.offset_seconds;
