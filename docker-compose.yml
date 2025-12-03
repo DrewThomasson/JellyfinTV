@@ -7,5 +7,5 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./jellyfintv.db:/app/jellyfintv.db
+      - ./data:/app/data
     restart: unless-stopped

@@ -9,6 +9,6 @@ class Settings(BaseModel):
     JELLYFIN_USER_ID: str = ""
     
     # Database
-    DATABASE_URL: str = "sqlite:///./jellyfintv.db"
+    DATABASE_URL: str = "sqlite:///./data/jellyfintv.db"
 
 settings = Settings()
