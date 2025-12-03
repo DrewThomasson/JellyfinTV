@@ -14,10 +14,9 @@ JellyfinTV simulates a linear TV experience using your existing Jellyfin library
 
 <p align="center">
 <img src="https://github.com/user-attachments/assets/8e78af50-4d3d-4875-b03f-b9d8561f8eeb" width="32%" alt="Detailed Screenshot 1" />
-<img src="https://github.com/user-attachments/assets/e12536f4-c89e-456b-8257-0d4699a71d35" width="32%" alt="Detailed Screenshot 2" />
+<img src="https://github.com/user-attachments/assets/c7440620-9e52-4de7-941a-3a62e1550120" width="32%" alt="Detailed Screenshot 2" />
 <img src="https://github.com/user-attachments/assets/b1c45c29-1a37-40a9-b4ef-b84d89ccebcf" width="32%" alt="Detailed Screenshot 3" />
 </p>
-
 
 ## Quick Start (Docker)
 
