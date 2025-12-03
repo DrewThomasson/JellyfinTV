@@ -1,14 +1,27 @@
 FROM python:3.11-slim
 
-WORKDIR /app
+# 1. Create a user with UID 1000 (required by Hugging Face Spaces)
+RUN useradd -m -u 1000 user
 
-# Install system dependencies if needed (e.g. for sqlite)
-# RUN apt-get update && apt-get install -y ...
+# 2. Switch to the new user
+USER user
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# 3. Set environment variables
+ENV HOME=/home/user \
+    PATH=/home/user/.local/bin:$PATH
 
-COPY . .
+# 4. Set working directory to a location writable by the user
+WORKDIR $HOME/app
+
+# 5. Copy requirements first to leverage Docker cache
+# Note: usage of --chown=user is crucial
+COPY --chown=user ./requirements.txt $HOME/app/requirements.txt
+
+# 6. Install dependencies
+RUN pip install --no-cache-dir --upgrade -r requirements.txt
+
+# 7. Copy the rest of the application code
+COPY --chown=user . $HOME/app
 
 # Expose the port
 EXPOSE 8000
