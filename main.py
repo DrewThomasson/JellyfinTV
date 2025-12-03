@@ -173,7 +173,46 @@ async def get_ratings():
 @app.post("/api/library/search")
 async def search_library(criteria: dict):
     # Wrapper to search items based on UI filters
-    return await jellyfin.search_items(criteria)
+    items = await jellyfin.search_items(criteria)
+    
+    # Deduplicate: Group by SeriesId
+    unique_map = {}
+    final_items = []
+    
+    for item in items:
+        # If it's an episode, use SeriesId as key. If Movie, use Id.
+        series_id = item.get("SeriesId")
+        item_id = item.get("Id")
+        
+        if series_id:
+            # It's an episode (or part of a series)
+            if series_id not in unique_map:
+                # Create a "Show" entry based on this episode
+                # We want the Series Name and Series Image
+                show_entry = {
+                    "Id": series_id,
+                    "Name": item.get("SeriesName", item.get("Name")), # Fallback if SeriesName missing
+                    "ProductionYear": item.get("ProductionYear"),
+                    "Type": "TV Series",
+                    "ImageTag": item.get("SeriesPrimaryImageTag"), # Use Series image
+                    "IsSeries": True,
+                    "EpisodeCount": 1
+                }
+                unique_map[series_id] = show_entry
+                final_items.append(show_entry)
+            else:
+                # Increment count
+                unique_map[series_id]["EpisodeCount"] += 1
+        else:
+            # It's a Movie or something else without SeriesId
+            if item_id not in unique_map:
+                item["ImageTag"] = item.get("ImageTags", {}).get("Primary")
+                item["IsSeries"] = False
+                item["Type"] = "Movie" # Explicitly set for UI
+                unique_map[item_id] = item
+                final_items.append(item)
+                
+    return final_items
 
 # Serve index
 from fastapi.responses import FileResponse

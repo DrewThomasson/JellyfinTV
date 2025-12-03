@@ -70,8 +70,14 @@
         <video id="video-player" controls autoplay></video>
     </div>
     <div id="overlay">
-        <h1 id="show-title">Title</h1>
-        <p id="show-meta">00:00 / 00:00</p>
+        <div style="display:flex; align-items:center; gap:20px;">
+            <img id="show-poster" src=""
+                style="width:60px; height:90px; object-fit:cover; border-radius:4px; display:none;">
+            <div>
+                <h1 id="show-title">Title</h1>
+                <p id="show-meta">00:00 / 00:00</p>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -108,6 +114,15 @@
                         video.play();
 
                         document.getElementById('show-title').innerText = item.item_name;
+
+                        // Set Poster
+                        const poster = document.getElementById('show-poster');
+                        if (!data.is_ad && item.item_id) {
+                            poster.src = `${data.jellyfin_url}/Items/${item.item_id}/Images/Primary?fillWidth=100&fillHeight=150&api_key=${data.jellyfin_token}`;
+                            poster.style.display = 'block';
+                        } else {
+                            poster.style.display = 'none';
+                        }
                     } else {
                         // Sync check: if we drifted too far, seek
                         if (Math.abs(video.currentTime - data.offset_seconds) > 10) {
