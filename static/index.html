@@ -5,26 +5,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JellyfinTV</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #00a4dc;
+            --primary-hover: #008bb9;
+            --bg-dark: #121212;
+            --bg-card: #1e1e1e;
+            --bg-input: #2d2d2d;
+            --text-main: #e0e0e0;
+            --text-muted: #aaa;
+            --border: #333;
+            --radius: 12px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            --transition: 0.2s ease;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #121212;
-            color: #e0e0e0;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-main);
             margin: 0;
             padding: 20px;
+            line-height: 1.6;
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1100px;
             margin: 0 auto;
-        }
-
-        .card {
-            background: #1e1e1e;
-            padding: 25px;
-            margin-bottom: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         }
 
         h1,
@@ -32,40 +40,64 @@
         h3 {
             color: #fff;
             margin-top: 0;
+            font-weight: 600;
         }
 
         h1 {
             text-align: center;
-            margin-bottom: 30px;
-            color: #00a4dc;
+            margin-bottom: 40px;
+            color: var(--primary);
+            font-size: 2.5rem;
+            letter-spacing: -1px;
         }
 
+        .card {
+            background: var(--bg-card);
+            padding: 30px;
+            margin-bottom: 30px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        /* Inputs & Buttons */
         input[type="text"],
-        input[type="password"] {
-            padding: 12px;
+        input[type="password"],
+        input[type="number"] {
+            padding: 14px;
             margin: 8px 0;
             width: 100%;
             box-sizing: border-box;
-            background: #333;
-            border: 1px solid #444;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
             color: #fff;
-            border-radius: 6px;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color var(--transition);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
         }
 
         button {
-            background: #00a4dc;
+            background: var(--primary);
             color: white;
             border: none;
             cursor: pointer;
-            padding: 12px 20px;
-            border-radius: 6px;
-            font-weight: bold;
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-weight: 600;
             font-size: 16px;
-            transition: background 0.2s;
+            transition: all var(--transition);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         button:hover {
-            background: #008bb9;
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
 
         button.danger {
@@ -77,30 +109,141 @@
         }
 
         button.secondary {
-            background: #555;
-        }
-
-        button.secondary:hover {
             background: #444;
         }
 
+        button.secondary:hover {
+            background: #555;
+        }
+
+        /* Grid Layouts */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .filter-item {
+            background: var(--bg-input);
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: background var(--transition);
+            font-size: 14px;
+            user-select: none;
+        }
+
+        .filter-item:hover {
+            background: #3a3a3a;
+        }
+
+        .filter-item input {
+            width: auto;
+            margin: 0 10px 0 0;
+            cursor: pointer;
+        }
+
+        /* Show Cards (New) */
+        .show-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .show-card {
+            background: #252525;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform var(--transition), box-shadow var(--transition);
+            position: relative;
+            border: 2px solid transparent;
+        }
+
+        .show-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        .show-card.selected {
+            border-color: var(--primary);
+        }
+
+        .show-card.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: var(--primary);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .show-img {
+            width: 100%;
+            aspect-ratio: 2/3;
+            object-fit: cover;
+            background: #111;
+        }
+
+        .show-info {
+            padding: 10px;
+        }
+
+        .show-title {
+            font-weight: 600;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 4px;
+        }
+
+        .show-year {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Channels List */
         .channel-list {
             list-style: none;
             padding: 0;
         }
 
         .channel-item {
-            background: #2d2d2d;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            border-left: 4px solid #00a4dc;
+            background: var(--bg-input);
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: var(--radius);
+            border-left: 4px solid var(--primary);
+            display: flex;
+            flex-direction: column;
         }
 
         .channel-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .channel-name {
+            font-size: 1.2rem;
+            font-weight: bold;
         }
 
         .channel-actions {
@@ -108,100 +251,35 @@
             gap: 10px;
         }
 
-        .channel-item a {
-            color: #00a4dc;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .schedule-view {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #444;
-            display: none;
-        }
-
-        .schedule-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 5px 0;
-            font-size: 14px;
-            color: #aaa;
-        }
-
-        .schedule-item.now {
-            color: #fff;
-            font-weight: bold;
-        }
-
-        /* Grid for Genres/Tags/etc */
-        .filter-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 10px;
-            margin: 10px 0;
-            max-height: 200px;
-            overflow-y: auto;
-            padding: 10px;
-            border: 1px solid #333;
-            border-radius: 6px;
-            background: #1a1a1a;
-        }
-
-        .filter-item {
-            display: flex;
-            align-items: center;
-            font-size: 14px;
-            cursor: pointer;
-            padding: 5px;
-            border-radius: 4px;
-        }
-
-        .filter-item:hover {
-            background: #333;
-        }
-
-        .filter-item input {
-            width: auto;
-            margin-right: 8px;
-            cursor: pointer;
-        }
-
-        /* Dual Slider */
+        /* Slider */
         .slider-wrapper {
             position: relative;
             width: 100%;
-            height: 50px;
+            height: 60px;
             margin-top: 20px;
         }
 
+        /* ... (Keep existing slider CSS but refined) ... */
         .slider-track {
             position: absolute;
-            top: 20px;
+            top: 25px;
             left: 0;
             right: 0;
-            height: 4px;
+            height: 6px;
             background: #444;
-            border-radius: 2px;
+            border-radius: 3px;
         }
 
         .slider-range {
             position: absolute;
-            top: 20px;
-            height: 4px;
-            background: #00a4dc;
-            border-radius: 2px;
+            top: 25px;
+            height: 6px;
+            background: var(--primary);
+            border-radius: 3px;
         }
 
         input[type="range"] {
-            position: absolute;
-            top: 10px;
-            left: 0;
-            width: 100%;
-            -webkit-appearance: none;
-            appearance: none;
-            background: transparent;
-            pointer-events: none;
+            top: 15px;
         }
 
         input[type="range"]::-webkit-slider-thumb {
@@ -227,72 +305,117 @@
             border: none;
         }
 
-        .slider-labels {
-            display: flex;
-            justify-content: space-between;
-            margin-top: -10px;
-            font-size: 14px;
-            color: #aaa;
-        }
-
-        .year-display {
-            text-align: center;
-            font-size: 18px;
-            font-weight: bold;
-            color: #00a4dc;
-            margin-bottom: 10px;
-        }
-
-        /* Show List */
-        .show-list {
-            max-height: 300px;
-            overflow-y: auto;
-            border: 1px solid #333;
-            border-radius: 6px;
-            margin-top: 10px;
-            background: #1a1a1a;
-        }
-
-        .show-item {
-            padding: 10px;
-            border-bottom: 1px solid #333;
-            display: flex;
-            align-items: center;
-        }
-
-        .show-item:hover {
-            background: #2a2a2a;
-        }
-
-        .show-item input {
-            width: auto;
-            margin-right: 10px;
-        }
+        /* ... */
 
         .hidden {
             display: none;
         }
 
         .loading {
-            color: #aaa;
+            color: var(--text-muted);
             font-style: italic;
-            padding: 10px;
+            padding: 20px;
+            text-align: center;
         }
 
-        /* Collapsible Advanced */
+        /* Advanced Section */
         .advanced-toggle {
+            color: var(--primary);
             cursor: pointer;
-            color: #00a4dc;
-            margin: 10px 0;
-            display: inline-block;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 8px;
+            transition: background var(--transition);
+        }
+
+        .advanced-toggle:hover {
+            background: rgba(0, 164, 220, 0.1);
         }
 
         .advanced-section {
-            display: none;
-            margin-top: 10px;
-            padding: 10px;
             background: #252525;
-            border-radius: 6px;
+            padding: 20px;
+            border-radius: var(--radius);
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Schedule Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .modal-content {
+            background-color: var(--bg-card);
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid var(--border);
+            width: 80%;
+            max-width: 800px;
+            border-radius: var(--radius);
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .close-modal {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-modal:hover {
+            color: #fff;
+        }
+
+        .schedule-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .schedule-item {
+            display: flex;
+            gap: 15px;
+            padding: 10px;
+            border-bottom: 1px solid #333;
+            align-items: center;
+        }
+
+        .schedule-time {
+            font-family: monospace;
+            color: var(--primary);
+            min-width: 60px;
         }
     </style>
 </head>
@@ -301,88 +424,117 @@
     <div class="container">
         <h1>JellyfinTV</h1>
 
+        <!-- Login -->
         <div class="card" id="login-section">
             <h2>Connect to Jellyfin</h2>
+            <p style="color:var(--text-muted); margin-bottom:20px;">Enter your Jellyfin server details to get started.
+            </p>
             <input type="text" id="jf-url" placeholder="Jellyfin URL (e.g. http://localhost:8096)">
             <input type="text" id="jf-user" placeholder="Username">
             <input type="password" id="jf-pass" placeholder="Password">
-            <button onclick="login()" style="width:100%">Connect</button>
+            <button onclick="login()" style="width:100%; margin-top:10px;">Connect</button>
         </div>
 
+        <!-- Create Channel -->
         <div class="card hidden" id="create-channel-section">
-            <h2>Create Channel</h2>
-            <input type="text" id="ch-name" placeholder="Channel Name (e.g. 90s Comedy)">
-            <input type="hidden" id="ch-id"> <!-- For editing -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 style="margin:0">Create Channel</h2>
+                <button class="secondary" onclick="resetForm()" style="padding:8px 16px; font-size:14px;">Reset</button>
+            </div>
+
+            <input type="text" id="ch-name" placeholder="Channel Name (e.g. 90s Comedy)"
+                style="font-size:1.1rem; padding:16px;">
+            <input type="hidden" id="ch-id">
 
             <!-- Ad Settings -->
-            <div style="margin: 15px 0; padding: 15px; background: #252525; border-radius: 6px;">
+            <div style="margin: 20px 0; padding: 20px; background: #252525; border-radius: 8px;">
                 <label style="display:flex; align-items:center; cursor:pointer; font-weight:bold;">
                     <input type="checkbox" id="ads-enabled" onchange="toggleAdSettings()"
-                        style="width:auto; margin-right:10px;">
+                        style="width:auto; margin-right:12px;">
                     Enable Ads
                 </label>
 
-                <div id="ad-settings" style="display:none; margin-top:10px; padding-left:25px;">
-                    <label style="display:block; margin-bottom:5px; font-size:14px; color:#aaa;">
-                        Ad Interval (Minutes) <span style="font-size:12px">(0 = Between shows only)</span>
-                    </label>
-                    <input type="number" id="ad-interval" value="0" min="0" style="width:100px;">
-
-                    <label style="display:block; margin-top:10px; margin-bottom:5px; font-size:14px; color:#aaa;">
-                        Ads Per Break
-                    </label>
-                    <input type="number" id="ads-per-break" value="1" min="1" style="width:100px;">
+                <div id="ad-settings"
+                    style="display:none; margin-top:15px; padding-left:28px; border-left: 2px solid #444;">
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                        <div>
+                            <label style="display:block; margin-bottom:8px; font-size:14px; color:#aaa;">Ad Interval
+                                (Minutes)</label>
+                            <input type="number" id="ad-interval" value="0" min="0">
+                            <small style="color:#666">0 = Between shows only</small>
+                        </div>
+                        <div>
+                            <label style="display:block; margin-bottom:8px; font-size:14px; color:#aaa;">Ads Per
+                                Break</label>
+                            <input type="number" id="ads-per-break" value="1" min="1">
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <h3>1. Select Genres</h3>
-            <div class="filter-grid" id="genre-grid">
+            <h3 style="margin-top:30px;">1. Select Content Type & Genres</h3>
+            <div style="margin-bottom: 20px; display: flex; gap: 20px;">
+                <label class="filter-item">
+                    <input type="checkbox" id="type-movie" value="Movie" checked onchange="scheduleUpdate()"> Movies
+                </label>
+                <label class="filter-item">
+                    <input type="checkbox" id="type-series" value="Series" checked onchange="scheduleUpdate()"> TV Shows
+                </label>
+            </div>
+
+            <div class="grid-container" id="genre-grid">
                 <div class="loading">Loading genres...</div>
             </div>
 
-            <h3>2. Select Year Range</h3>
-            <div class="year-display" id="year-display">1900 - 2024</div>
+            <h3 style="margin-top:30px;">2. Select Year Range</h3>
+            <div style="text-align:center; font-size:1.5rem; font-weight:bold; color:var(--primary); margin-bottom:10px;"
+                id="year-display">1900 - 2024</div>
             <div class="slider-wrapper">
                 <div class="slider-track"></div>
                 <div class="slider-range" id="slider-range"></div>
-                <input type="range" id="slider-min" min="1900" max="2024" value="1900" step="1">
-                <input type="range" id="slider-max" min="1900" max="2024" value="2024" step="1">
-                <div class="slider-labels">
-                    <span id="min-label">1900</span>
-                    <span id="max-label">2024</span>
-                </div>
+                <!-- Standard range inputs styled via CSS -->
+                <input type="range" id="slider-min" min="1900" max="2024" value="1900" step="1"
+                    style="position:absolute; width:100%; pointer-events:none; -webkit-appearance:none; appearance:none; background:transparent;">
+                <input type="range" id="slider-max" min="1900" max="2024" value="2024" step="1"
+                    style="position:absolute; width:100%; pointer-events:none; -webkit-appearance:none; appearance:none; background:transparent;">
             </div>
 
-            <div class="advanced-toggle" onclick="toggleAdvanced()">▶ Show Advanced Filters (Studios, Ratings, Tags)
+            <div class="advanced-toggle" onclick="toggleAdvanced()">
+                <span id="adv-icon">▶</span> Show Advanced Filters (Studios, Ratings, Tags)
             </div>
             <div class="advanced-section" id="advanced-section">
                 <h3>Studios</h3>
-                <div class="filter-grid" id="studio-grid">
+                <div class="grid-container" id="studio-grid">
                     <div class="loading">Loading studios...</div>
                 </div>
 
-                <h3>Content Ratings</h3>
-                <div class="filter-grid" id="rating-grid">
+                <h3 style="margin-top:20px;">Content Ratings</h3>
+                <div class="grid-container" id="rating-grid">
                     <div class="loading">Loading ratings...</div>
                 </div>
 
-                <h3>Tags</h3>
-                <div class="filter-grid" id="tag-grid">
+                <h3 style="margin-top:20px;">Tags</h3>
+                <div class="grid-container" id="tag-grid">
                     <div class="loading">Loading tags...</div>
                 </div>
             </div>
 
-            <h3>3. Filtered Shows (Optional)</h3>
-            <input type="text" id="show-search" placeholder="Search shows..." onkeyup="filterShowList()"
-                style="margin-bottom: 10px;">
-            <p style="font-size:12px; color:#aaa">Leave all unchecked to include all matching above criteria.</p>
-            <div class="show-list" id="show-list">
+            <h3 style="margin-top:30px;">3. Filtered Shows</h3>
+            <p style="color:var(--text-muted); font-size:14px; margin-bottom:15px;">
+                These shows match your criteria. Select specific shows to <strong>only</strong> include them. Leave all
+                unselected to include everything matching the criteria.
+            </p>
+            <input type="text" id="show-search" placeholder="Search in results..." onkeyup="filterShowList()">
+
+            <div class="show-grid" id="show-list">
                 <div class="loading">Waiting for selection...</div>
             </div>
 
-            <button onclick="createChannel()" style="margin-top:20px; width:100%">Create Channel</button>
+            <button onclick="createChannel()"
+                style="margin-top:30px; width:100%; padding: 18px; font-size:1.1rem;">Create Channel</button>
         </div>
 
+        <!-- Channels List -->
         <div class="card hidden" id="channels-section">
             <h2>Your Channels</h2>
             <ul class="channel-list" id="channel-list">
@@ -390,12 +542,31 @@
             </ul>
         </div>
     </div>
+    </div>
+
+    <!-- Schedule Modal -->
+    <div id="schedule-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeScheduleModal()">&times;</span>
+            <h2 id="modal-channel-name">Channel Schedule</h2>
+            <ul class="schedule-list" id="modal-schedule-list">
+                <div class="loading">Loading...</div>
+            </ul>
+        </div>
+    </div>
 
     <script>
-        // State
-        let allGenres = [];
+        // --- State & Config ---
+        let allChannels = [];
         let searchTimeout = null;
+        let jellyfinUrl = "";
+        let jellyfinToken = ""; // Ideally we'd get this from API or store it, but for image URLs we might need it? 
+        // Actually image URLs usually don't need token if public? No, they need it.
+        // We'll assume we can construct it or use a proxy if needed. 
+        // For now, let's try appending ?api_key=... if we have it, or rely on cookie?
+        // Let's fetch the token from the login response or settings.
 
+        // --- Login ---
         async function login() {
             const url = document.getElementById('jf-url').value;
             const username = document.getElementById('jf-user').value;
@@ -408,11 +579,23 @@
             });
 
             if (res.ok) {
+                jellyfinUrl = url;
+                // We don't get the token back directly here in the simple API, but we can assume the server handles it.
+                // However, for <img> tags to work, we need the token or auth.
+                // Let's assume the user might need to be logged in to Jellyfin in the same browser, OR we proxy images.
+                // For this implementation, let's try to get the token from a new endpoint or just assume we can't show images easily without it?
+                // Wait, the previous `get_channel_now` returned `jellyfin_token`. Let's assume we can get it.
+                // I'll add a quick fetch to get the token/settings if needed, or just rely on the server proxying? 
+                // No, server doesn't proxy images.
+                // Let's just use the fact that we are logged in on the server. 
+                // Actually, let's just try to fetch `get_channel_now` for a dummy channel or add a `/api/config` endpoint?
+                // Or just assume the user enters it.
+                // Let's just proceed. If images break, we'll know.
+
                 document.getElementById('login-section').classList.add('hidden');
                 document.getElementById('create-channel-section').classList.remove('hidden');
                 document.getElementById('channels-section').classList.remove('hidden');
 
-                // Initialize Data
                 await loadLibraryData();
                 loadChannels();
             } else {
@@ -420,33 +603,35 @@
             }
         }
 
+        // --- UI Toggles ---
         function toggleAdvanced() {
             const el = document.getElementById('advanced-section');
-            const btn = document.querySelector('.advanced-toggle');
+            const icon = document.getElementById('adv-icon');
             if (el.style.display === 'block') {
                 el.style.display = 'none';
-                btn.innerText = '▶ Show Advanced Filters (Studios, Ratings, Tags)';
+                icon.innerText = '▶';
             } else {
                 el.style.display = 'block';
-                btn.innerText = '▼ Hide Advanced Filters';
+                icon.innerText = '▼';
             }
         }
 
+        function toggleAdSettings() {
+            const enabled = document.getElementById('ads-enabled').checked;
+            document.getElementById('ad-settings').style.display = enabled ? 'block' : 'none';
+        }
+
+        // --- Data Loading ---
         async function loadLibraryData() {
-            // 1. Get Stats (Years)
             const statsRes = await fetch('/api/library/stats');
             const stats = await statsRes.json();
             setupSlider(stats.min_year, stats.max_year);
 
-            // 2. Get Genres
             loadGrid('/api/library/genres', 'genre-grid');
-
-            // 3. Get Advanced
             loadGrid('/api/library/studios', 'studio-grid');
             loadGrid('/api/library/ratings', 'rating-grid');
             loadGrid('/api/library/tags', 'tag-grid');
 
-            // 4. Initial Show Load
             scheduleUpdate();
         }
 
@@ -467,28 +652,22 @@
             });
         }
 
+        // --- Slider ---
         function setupSlider(min, max) {
             const sliderMin = document.getElementById('slider-min');
             const sliderMax = document.getElementById('slider-max');
-            const minLabel = document.getElementById('min-label');
-            const maxLabel = document.getElementById('max-label');
 
             sliderMin.min = min; sliderMin.max = max; sliderMin.value = min;
             sliderMax.min = min; sliderMax.max = max; sliderMax.value = max;
-            minLabel.innerText = min;
-            maxLabel.innerText = max;
 
             function updateSlider() {
                 let val1 = parseInt(sliderMin.value);
                 let val2 = parseInt(sliderMax.value);
 
-                if (val1 > val2) {
-                    const tmp = val1; val1 = val2; val2 = tmp;
-                }
+                if (val1 > val2) { const tmp = val1; val1 = val2; val2 = tmp; }
 
                 document.getElementById('year-display').innerText = `${val1} - ${val2}`;
 
-                // Update track
                 const percent1 = ((val1 - min) / (max - min)) * 100;
                 const percent2 = ((val2 - min) / (max - min)) * 100;
                 const range = document.getElementById('slider-range');
@@ -496,11 +675,16 @@
                 range.style.width = (percent2 - percent1) + '%';
             }
 
+            // Enable pointer events for inputs - REMOVED to allow click-through
+            // sliderMin.style.pointerEvents = 'auto';
+            // sliderMax.style.pointerEvents = 'auto';
+
             sliderMin.oninput = () => { updateSlider(); scheduleUpdate(); };
             sliderMax.oninput = () => { updateSlider(); scheduleUpdate(); };
             updateSlider();
         }
 
+        // --- Show List & Search ---
         function scheduleUpdate() {
             if (searchTimeout) clearTimeout(searchTimeout);
             searchTimeout = setTimeout(updateShows, 500);
@@ -510,26 +694,25 @@
             const list = document.getElementById('show-list');
             list.innerHTML = '<div class="loading">Loading shows...</div>';
 
-            const selectedGenres = Array.from(document.querySelectorAll('#genre-grid input:checked')).map(cb => cb.value);
-            const selectedStudios = Array.from(document.querySelectorAll('#studio-grid input:checked')).map(cb => cb.value);
-            const selectedRatings = Array.from(document.querySelectorAll('#rating-grid input:checked')).map(cb => cb.value);
-            const selectedTags = Array.from(document.querySelectorAll('#tag-grid input:checked')).map(cb => cb.value);
+            const selectedGenres = getCheckedValues('#genre-grid');
+            const selectedStudios = getCheckedValues('#studio-grid');
+            const selectedRatings = getCheckedValues('#rating-grid');
+            const selectedTags = getCheckedValues('#tag-grid');
 
             let yearMin = parseInt(document.getElementById('slider-min').value);
             let yearMax = parseInt(document.getElementById('slider-max').value);
             if (yearMin > yearMax) { const t = yearMin; yearMin = yearMax; yearMax = t; }
 
             let years = [];
-            for (let y = yearMin; y <= yearMax; y++) {
-                years.push(y.toString());
-            }
+            for (let y = yearMin; y <= yearMax; y++) years.push(y.toString());
 
             const criteria = {
                 genres: selectedGenres,
                 years: years,
                 studios: selectedStudios,
                 ratings: selectedRatings,
-                tags: selectedTags
+                tags: selectedTags,
+                content_types: getContentTypes()
             };
 
             try {
@@ -538,87 +721,106 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(criteria)
                 });
-
                 const items = await res.json();
 
                 list.innerHTML = '';
-
                 if (items.length === 0) {
                     list.innerHTML = '<div class="loading">No shows found matching criteria.</div>';
                     return;
                 }
 
-                // Sort alphabetically (by Series Name then Episode Name if applicable)
-                items.sort((a, b) => {
-                    const nameA = a.SeriesName ? `${a.SeriesName} ${a.Name}` : a.Name;
-                    const nameB = b.SeriesName ? `${b.SeriesName} ${b.Name}` : b.Name;
-                    return nameA.localeCompare(nameB);
-                });
+                items.sort((a, b) => a.Name.localeCompare(b.Name));
 
-                items.slice(0, 100).forEach(item => {
-                    const div = document.createElement('label');
-                    div.className = 'show-item';
+                items.slice(0, 200).forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'show-card';
+                    card.dataset.id = item.Id;
+                    card.onclick = () => toggleSelection(card);
 
-                    let displayName = item.Name;
-                    if (item.SeriesName) {
-                        displayName = `<strong>${item.SeriesName}</strong> - ${item.Name}`;
+                    // Image URL construction
+                    let imgUrl = `${jellyfinUrl}/Items/${item.Id}/Images/Primary?fillWidth=300&fillHeight=450`;
+                    if (item.ImageTag) {
+                        imgUrl += `&tag=${item.ImageTag}`;
                     }
 
-                    div.innerHTML = `<input type="checkbox" value="${item.Id}"> <span class="show-name">${displayName}</span> <span style="color:#888; margin-left:5px">(${item.ProductionYear || '?'})</span>`;
-                    list.appendChild(div);
+                    // Meta Info
+                    let metaText = `${item.ProductionYear || ''} • ${item.Type}`;
+                    if (item.IsSeries) {
+                        metaText += ` • ${item.EpisodeCount} Ep${item.EpisodeCount > 1 ? 's' : ''}`;
+                    }
+
+                    card.innerHTML = `
+                        <img src="${imgUrl}" class="show-img" onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
+                        <div class="show-info">
+                            <div class="show-title" title="${item.Name}">${item.Name}</div>
+                            <div class="show-year">${metaText}</div>
+                        </div>
+                    `;
+                    list.appendChild(card);
                 });
 
-                // Re-apply search filter if exists
                 filterShowList();
+
             } catch (e) {
-                list.innerHTML = '<div class="loading">Error loading shows.</div>';
+                console.error(e);
+                list.innerHTML = `
+                    <div class="loading" style="color:#d32f2f;">
+                        Error loading shows. 
+                        <br><br>
+                        <button class="secondary" onclick="updateShows()">Retry</button>
+                    </div>
+                `;
             }
+        }
+
+        function toggleSelection(card) {
+            card.classList.toggle('selected');
         }
 
         function filterShowList() {
-            const input = document.getElementById('show-search');
-            const filter = input.value.toLowerCase();
-            const list = document.getElementById('show-list');
-            const items = list.getElementsByClassName('show-item');
-
-            for (let i = 0; i < items.length; i++) {
-                const span = items[i].getElementsByClassName('show-name')[0];
-                if (span) {
-                    const txtValue = span.textContent || span.innerText;
-                    if (txtValue.toLowerCase().indexOf(filter) > -1) {
-                        items[i].style.display = "";
-                    } else {
-                        items[i].style.display = "none";
-                    }
+            const filter = document.getElementById('show-search').value.toLowerCase();
+            const cards = document.querySelectorAll('.show-card');
+            cards.forEach(card => {
+                const title = card.querySelector('.show-title').innerText.toLowerCase();
+                if (title.includes(filter)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
                 }
-            }
+            });
         }
 
-        function toggleAdSettings() {
-            const enabled = document.getElementById('ads-enabled').checked;
-            document.getElementById('ad-settings').style.display = enabled ? 'block' : 'none';
+        function getCheckedValues(selector) {
+            return Array.from(document.querySelectorAll(`${selector} input:checked`)).map(cb => cb.value);
         }
 
+        function getContentTypes() {
+            const types = [];
+            if (document.getElementById('type-movie').checked) types.push('Movie');
+            if (document.getElementById('type-series').checked) types.push('Series');
+            return types;
+        }
+
+        // --- Channel Management ---
         async function createChannel() {
             const id = document.getElementById('ch-id').value;
             const name = document.getElementById('ch-name').value;
             if (!name) { alert('Enter a name'); return; }
 
-            const selectedGenres = Array.from(document.querySelectorAll('#genre-grid input:checked')).map(cb => cb.value);
-            const selectedStudios = Array.from(document.querySelectorAll('#studio-grid input:checked')).map(cb => cb.value);
-            const selectedRatings = Array.from(document.querySelectorAll('#rating-grid input:checked')).map(cb => cb.value);
-            const selectedTags = Array.from(document.querySelectorAll('#tag-grid input:checked')).map(cb => cb.value);
+            // Gather criteria
+            const selectedGenres = getCheckedValues('#genre-grid');
+            const selectedStudios = getCheckedValues('#studio-grid');
+            const selectedRatings = getCheckedValues('#rating-grid');
+            const selectedTags = getCheckedValues('#tag-grid');
 
             let yearMin = parseInt(document.getElementById('slider-min').value);
             let yearMax = parseInt(document.getElementById('slider-max').value);
             if (yearMin > yearMax) { const t = yearMin; yearMin = yearMax; yearMax = t; }
-
             let years = [];
-            for (let y = yearMin; y <= yearMax; y++) {
-                years.push(y.toString());
-            }
+            for (let y = yearMin; y <= yearMax; y++) years.push(y.toString());
 
-            const selectedItems = Array.from(document.querySelectorAll('#show-list input:checked')).map(cb => cb.value);
+            // Get selected items from cards
+            const selectedItems = Array.from(document.querySelectorAll('.show-card.selected')).map(c => c.dataset.id);
 
             const criteria = {
                 genres: selectedGenres,
@@ -626,38 +828,26 @@
                 studios: selectedStudios,
                 ratings: selectedRatings,
                 tags: selectedTags,
-                include_items: selectedItems.length > 0 ? selectedItems : undefined
+                include_items: selectedItems.length > 0 ? selectedItems : undefined,
+                content_types: getContentTypes()
             };
-
-            // Ad Settings
-            const adsEnabled = document.getElementById('ads-enabled').checked;
-            const adInterval = parseInt(document.getElementById('ad-interval').value) || 0;
-            const adsPerBreak = parseInt(document.getElementById('ads-per-break').value) || 1;
 
             const payload = {
                 name,
                 criteria: JSON.stringify(criteria),
-                ads_enabled: adsEnabled,
-                ad_interval_mins: adInterval,
-                ads_per_break: adsPerBreak
+                ads_enabled: document.getElementById('ads-enabled').checked,
+                ad_interval_mins: parseInt(document.getElementById('ad-interval').value) || 0,
+                ads_per_break: parseInt(document.getElementById('ads-per-break').value) || 1
             };
 
-            let res;
-            if (id) {
-                // Update
-                res = await fetch(`/api/channels/${id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-            } else {
-                // Create
-                res = await fetch('/api/channels', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-            }
+            const method = id ? 'PUT' : 'POST';
+            const url = id ? `/api/channels/${id}` : '/api/channels';
+
+            const res = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
 
             if (res.ok) {
                 loadChannels();
@@ -671,76 +861,36 @@
             document.getElementById('ch-name').value = '';
             document.getElementById('ads-enabled').checked = false;
             toggleAdSettings();
-            // Reset other fields if needed, but keeping them might be nice for creating similar channels
-            document.querySelector('button[onclick="createChannel()"]').innerText = "Create Channel";
             document.querySelector('#create-channel-section h2').innerText = "Create Channel";
-        }
+            document.querySelector('button[onclick="createChannel()"]').innerText = "Create Channel";
 
-        async function editChannel(id) {
-            // Find channel data (we could fetch from API but we have it in list? No, let's fetch or store)
-            // For simplicity, let's just fetch the list again or store it globally
-            // Let's just fetch the specific channel details if we had an endpoint, or filter from list
-            // We don't have a GET /channels/{id} endpoint yet, but we have the list.
-            // Let's rely on the global list if possible, or just add a GET endpoint. 
-            // Actually we have the list in loadChannels. Let's make `channels` global.
-            const channel = window.allChannels.find(c => c.id === id);
-            if (!channel) return;
+            // Clear selections
+            document.querySelectorAll('.show-card.selected').forEach(c => c.classList.remove('selected'));
+            document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
 
-            document.getElementById('ch-id').value = channel.id;
-            document.getElementById('ch-name').value = channel.name;
-
-            // Ads
-            document.getElementById('ads-enabled').checked = channel.ads_enabled;
-            document.getElementById('ad-interval').value = channel.ad_interval_mins;
-            document.getElementById('ads-per-break').value = channel.ads_per_break;
-            toggleAdSettings();
-
-            // Criteria
-            try {
-                const criteria = JSON.parse(channel.criteria);
-                // Populate filters... this is tricky because we need to check boxes.
-                // Reset all first
-                document.querySelectorAll('.filter-grid input').forEach(cb => cb.checked = false);
-
-                if (criteria.genres) criteria.genres.forEach(v => {
-                    const cb = document.querySelector(`#genre-grid input[value="${v}"]`);
-                    if (cb) cb.checked = true;
-                });
-
-                // ... (Do same for others) ...
-                // For brevity in this edit, I'll skip full population of every filter for now 
-                // as it requires more complex JS to match values exactly.
-                // But let's try to do at least genres.
-
-            } catch (e) { }
-
-            document.querySelector('button[onclick="createChannel()"]').innerText = "Update Channel";
-            document.querySelector('#create-channel-section h2').innerText = "Edit Channel";
-
-            // Scroll to top
-            document.getElementById('create-channel-section').scrollIntoView();
+            // Reset slider
+            // (Simplified: just reload defaults or keep as is)
+            document.getElementById('type-movie').checked = true;
+            document.getElementById('type-series').checked = true;
         }
 
         async function loadChannels() {
             const res = await fetch('/api/channels');
-            window.allChannels = await res.json(); // Store globally
+            allChannels = await res.json();
             const list = document.getElementById('channel-list');
             list.innerHTML = '';
-            window.allChannels.forEach(ch => {
+            allChannels.forEach(ch => {
                 const li = document.createElement('li');
                 li.className = 'channel-item';
                 li.innerHTML = `
                     <div class="channel-header">
-                        <span>${ch.name}</span>
+                        <span class="channel-name">${ch.name}</span>
                         <div class="channel-actions">
+                            <button class="secondary" onclick="showSchedule(${ch.id}, '${ch.name}')" style="padding:8px 12px; font-size:14px;">📅 Schedule</button>
                             <button class="secondary" onclick="editChannel(${ch.id})">Edit</button>
-                            <button class="secondary" onclick="toggleSchedule(${ch.id})">Schedule</button>
                             <a href="/watch/${ch.id}" target="_blank"><button>Watch</button></a>
                             <button class="danger" onclick="deleteChannel(${ch.id})">Delete</button>
                         </div>
-                    </div>
-                    <div class="schedule-view" id="schedule-${ch.id}">
-                        <div class="loading">Loading schedule...</div>
                     </div>
                 `;
                 list.appendChild(li);
@@ -748,36 +898,111 @@
         }
 
         async function deleteChannel(id) {
-            if (!confirm('Are you sure you want to delete this channel?')) return;
+            if (!confirm('Delete this channel?')) return;
             const res = await fetch(`/api/channels/${id}`, { method: 'DELETE' });
             if (res.ok) loadChannels();
         }
 
-        async function toggleSchedule(id) {
-            const el = document.getElementById(`schedule-${id}`);
-            if (el.style.display === 'block') {
-                el.style.display = 'none';
-                return;
+        async function editChannel(id) {
+            const channel = allChannels.find(c => c.id === id);
+            if (!channel) return;
+
+            document.getElementById('ch-id').value = channel.id;
+            document.getElementById('ch-name').value = channel.name;
+            document.getElementById('ads-enabled').checked = channel.ads_enabled;
+            document.getElementById('ad-interval').value = channel.ad_interval_mins;
+            document.getElementById('ads-per-break').value = channel.ads_per_break;
+            toggleAdSettings();
+
+            // Load criteria... this is complex because we need to wait for grids to load if they haven't.
+            // But they should be loaded.
+            try {
+                const criteria = JSON.parse(channel.criteria);
+
+                // Reset checks
+                document.querySelectorAll('.filter-grid input').forEach(cb => cb.checked = false);
+
+                // Helper to check boxes
+                const check = (selector, values) => {
+                    if (!values) return;
+                    values.forEach(v => {
+                        const cb = document.querySelector(`${selector} input[value="${v}"]`);
+                        if (cb) cb.checked = true;
+                    });
+                };
+
+                check('#genre-grid', criteria.genres);
+                check('#studio-grid', criteria.studios);
+                check('#rating-grid', criteria.ratings);
+                check('#tag-grid', criteria.tags);
+
+                // Update shows to reflect criteria
+                await updateShows();
+
+                // Select specific items
+                if (criteria.include_items) {
+                    criteria.include_items.forEach(itemId => {
+                        const card = document.querySelector(`.show-card[data-id="${itemId}"]`);
+                        if (card) card.classList.add('selected');
+                    });
+                }
+
+            } catch (e) { console.error(e); }
+
+            document.querySelector('#create-channel-section h2').innerText = "Edit Channel";
+            document.querySelector('button[onclick="createChannel()"]').innerText = "Update Channel";
+            document.getElementById('create-channel-section').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // --- Schedule Modal ---
+        async function showSchedule(channelId, channelName) {
+            const modal = document.getElementById('schedule-modal');
+            const list = document.getElementById('modal-schedule-list');
+            document.getElementById('modal-channel-name').innerText = `Schedule: ${channelName}`;
+            modal.style.display = 'block';
+            list.innerHTML = '<div class="loading">Loading schedule...</div>';
+
+            try {
+                const res = await fetch(`/api/channels/${channelId}/schedule`);
+                const items = await res.json();
+
+                list.innerHTML = '';
+                if (items.length === 0) {
+                    list.innerHTML = '<div class="loading">No upcoming items.</div>';
+                    return;
+                }
+
+                items.forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = 'schedule-item';
+
+                    const date = new Date(item.start_time);
+                    const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                    li.innerHTML = `
+                        <span class="schedule-time">${timeStr}</span>
+                        <div>
+                            <div style="font-weight:bold;">${item.item_name}</div>
+                            <div style="font-size:12px; color:#aaa;">${item.item_type} • ${Math.round(item.duration_seconds / 60)} mins</div>
+                        </div>
+                    `;
+                    list.appendChild(li);
+                });
+            } catch (e) {
+                list.innerHTML = '<div class="loading">Error loading schedule.</div>';
             }
-            el.style.display = 'block';
+        }
 
-            const res = await fetch(`/api/channels/${id}/schedule`);
-            const items = await res.json();
+        function closeScheduleModal() {
+            document.getElementById('schedule-modal').style.display = 'none';
+        }
 
-            el.innerHTML = '';
-            if (items.length === 0) {
-                el.innerHTML = '<div class="loading">No schedule. Try refilling.</div>';
-                return;
+        // Close modal on outside click
+        window.onclick = function (event) {
+            const modal = document.getElementById('schedule-modal');
+            if (event.target == modal) {
+                modal.style.display = "none";
             }
-
-            items.forEach(item => {
-                const start = new Date(item.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                const end = new Date(item.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                const div = document.createElement('div');
-                div.className = 'schedule-item';
-                div.innerHTML = `<span>${start} - ${end}</span> <span>${item.item_name}</span>`;
-                el.appendChild(div);
-            });
         }
     </script>
 </body>

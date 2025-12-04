@@ -61,23 +61,121 @@
             transform: translate(-50%, -50%);
             font-size: 24px;
         }
+
+        /* Schedule Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .modal-content {
+            background-color: #1e1e1e;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #333;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 12px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            color: #fff;
+        }
+
+        .close-modal {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-modal:hover {
+            color: #fff;
+        }
+
+        .schedule-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .schedule-item {
+            display: flex;
+            gap: 15px;
+            padding: 10px;
+            border-bottom: 1px solid #333;
+            align-items: center;
+        }
+
+        .schedule-time {
+            font-family: monospace;
+            color: #00a4dc;
+            min-width: 60px;
+        }
     </style>
 </head>
 
 <body>
     <div id="loading">Loading Channel...</div>
     <div id="player-container">
-        <video id="video-player" controls autoplay></video>
+        <!-- playsinline is important for iPhone to not go fullscreen immediately and allow overlay -->
+        <video id="video-player" controls autoplay playsinline></video>
     </div>
     <div id="overlay">
-        <h1 id="show-title">Title</h1>
-        <p id="show-meta">00:00 / 00:00</p>
+        <div style="display:flex; align-items:center; gap:20px;">
+            <img id="show-poster" src=""
+                style="width:60px; height:90px; object-fit:cover; border-radius:4px; display:none;">
+            <div>
+                <h1 id="show-title">Title</h1>
+                <p id="show-meta">00:00 / 00:00</p>
+            </div>
+        </div>
+        <div style="margin-top:15px;">
+            <button onclick="showSchedule()"
+                style="background:#00a4dc; color:white; border:none; padding:8px 12px; border-radius:4px; cursor:pointer;">📅
+                Schedule</button>
+            <a href="/" style="text-decoration:none;"><button
+                    style="background:#444; color:white; border:none; padding:8px 12px; border-radius:4px; cursor:pointer; margin-left:10px;">🏠
+                    Home</button></a>
+        </div>
+    </div>
+
+    <!-- Schedule Modal -->
+    <div id="schedule-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeScheduleModal()">&times;</span>
+            <h2>Upcoming Schedule</h2>
+            <ul class="schedule-list" id="modal-schedule-list">
+                <div class="loading">Loading...</div>
+            </ul>
+        </div>
     </div>
 
     <script>
         const channelId = window.location.pathname.split('/').pop();
         const video = document.getElementById('video-player');
         let currentItemId = null;
+
+        // iOS Detection
+        function isIOS() {
+            return [
+                'iPad Simulator',
+                'iPhone Simulator',
+                'iPod Simulator',
+                'iPad',
+                'iPhone',
+                'iPod'
+            ].includes(navigator.platform)
+                // iPad on iOS 13 detection
+                || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
+                || navigator.userAgent.includes("iPhone");
+        }
 
         async function checkSchedule() {
             try {
@@ -101,13 +199,29 @@
                         } else {
                             // Jellyfin Stream
                             streamUrl = `${data.jellyfin_url}/Videos/${item.item_id}/stream?static=true&mediaSourceId=${item.item_id}&deviceId=jellyfintv-client&api_key=${data.jellyfin_token}`;
+
+                            // iPhone Fix: Force Transcoding to H264/AAC/MP4
+                            if (isIOS()) {
+                                console.log("iOS detected: Forcing H264/AAC transcoding");
+                                streamUrl = `${data.jellyfin_url}/Videos/${item.item_id}/stream?container=mp4&videoCodec=h264&audioCodec=aac&audioStreamIndex=1&transcodingMaxAudioChannels=2&segmentContainer=mp4&minSegments=1&breakOnNonKeyFrames=True&manifestSubtitles=vtt&api_key=${data.jellyfin_token}`;
+                                // Note: Removed static=true to allow transcoding
+                            }
                         }
 
                         video.src = streamUrl;
                         video.currentTime = data.offset_seconds;
-                        video.play();
+                        video.play().catch(e => console.log("Autoplay prevented:", e));
 
                         document.getElementById('show-title').innerText = item.item_name;
+
+                        // Set Poster
+                        const poster = document.getElementById('show-poster');
+                        if (!data.is_ad && item.item_id) {
+                            poster.src = `${data.jellyfin_url}/Items/${item.item_id}/Images/Primary?fillWidth=100&fillHeight=150&api_key=${data.jellyfin_token}`;
+                            poster.style.display = 'block';
+                        } else {
+                            poster.style.display = 'none';
+                        }
                     } else {
                         // Sync check: if we drifted too far, seek
                         if (Math.abs(video.currentTime - data.offset_seconds) > 10) {
@@ -137,6 +251,56 @@
             currentItemId = null; // Force reload
             checkSchedule();
         };
+
+        // --- Schedule Modal ---
+        async function showSchedule() {
+            const modal = document.getElementById('schedule-modal');
+            const list = document.getElementById('modal-schedule-list');
+            modal.style.display = 'block';
+            list.innerHTML = '<div>Loading schedule...</div>';
+
+            try {
+                const res = await fetch(`/api/channels/${channelId}/schedule`);
+                const items = await res.json();
+
+                list.innerHTML = '';
+                if (items.length === 0) {
+                    list.innerHTML = '<div>No upcoming items.</div>';
+                    return;
+                }
+
+                items.forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = 'schedule-item';
+
+                    const date = new Date(item.start_time);
+                    const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                    li.innerHTML = `
+                        <span class="schedule-time">${timeStr}</span>
+                        <div>
+                            <div style="font-weight:bold;">${item.item_name}</div>
+                            <div style="font-size:12px; color:#aaa;">${item.item_type} • ${Math.round(item.duration_seconds / 60)} mins</div>
+                        </div>
+                    `;
+                    list.appendChild(li);
+                });
+            } catch (e) {
+                list.innerHTML = '<div>Error loading schedule.</div>';
+            }
+        }
+
+        function closeScheduleModal() {
+            document.getElementById('schedule-modal').style.display = 'none';
+        }
+
+        // Close modal on outside click
+        window.onclick = function (event) {
+            const modal = document.getElementById('schedule-modal');
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
     </script>
 </body>
 

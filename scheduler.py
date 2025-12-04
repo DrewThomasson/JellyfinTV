@@ -41,7 +41,23 @@ async def fill_channel_schedule(channel_id: int, hours_to_fill: int = 24):
         # Filter by specific items if selected
         if criteria_dict.get("include_items"):
             included_ids = set(criteria_dict["include_items"])
-            items = [i for i in items if i["Id"] in included_ids]
+            # Include if the Item ID is selected OR if the Item's Series ID is selected
+            items = [
+                i for i in items 
+                if i["Id"] in included_ids or i.get("SeriesId") in included_ids
+            ]
+            
+        # Filter by Content Type (Movie/Series)
+        content_types = criteria_dict.get("content_types", [])
+        if content_types:
+            filtered_items = []
+            for item in items:
+                is_series = bool(item.get("SeriesId"))
+                if is_series and "Series" in content_types:
+                    filtered_items.append(item)
+                elif not is_series and "Movie" in content_types:
+                    filtered_items.append(item)
+            items = filtered_items
         
         if not items:
             print(f"No items found for channel {channel.name}")
