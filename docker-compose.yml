@@ -9,3 +9,11 @@ services:
     volumes:
       - ./data:/app/data
     restart: unless-stopped
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    command: tunnel --url http://jellyfintv:8000
+    depends_on:
+      - jellyfintv
+    restart: unless-stopped
